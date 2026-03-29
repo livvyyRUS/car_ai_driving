@@ -1,5 +1,6 @@
 import pyglet
 import math
+import numpy as np
 
 from pyglet.graphics import Batch, Group
 from pyglet.window import Window
@@ -165,3 +166,61 @@ class Car(Object):
 
     def func_when_alive(self):
         self.sprite.color = (255, 255, 255)
+        
+    def cast_ray(self, angle_deg, walls, max_distance=400):
+        """Пустить луч от центра машинки под углом angle_deg (глобальный угол).
+        Вернуть расстояние до ближайшей стены или max_distance."""
+        angle_rad = math.radians(angle_deg)
+        dx = math.cos(angle_rad)
+        dy = math.sin(angle_rad)
+        # Начальная точка
+        x0, y0 = self.x_pos, self.y_pos
+        min_dist = max_distance
+        for wall in walls:
+            # wall – объект с атрибутами x1,y1,x2,y2
+            # Проверяем пересечение луча (x0,y0)-(x0+dx*max_dist, y0+dy*max_dist) со стеной
+            intersect_point = self.ray_segment_intersection(
+                (x0, y0), (x0+dx*max_distance, y0+dy*max_distance),
+                (wall.x1, wall.y1), (wall.x2, wall.y2)
+            )
+            if intersect_point:
+                dist = math.hypot(intersect_point[0]-x0, intersect_point[1]-y0)
+                if dist < min_dist:
+                    min_dist = dist
+        return min_dist
+
+    @staticmethod
+    def ray_segment_intersection(ray_start, ray_end, seg_start, seg_end):
+        # Решение системы параметрических уравнений. Можно использовать готовый алгоритм.
+        # Возвращает точку пересечения или None.
+        # (Здесь упрощённо – для реального кода нужна проверка)
+        # Приведу рабочий вариант:
+        x1, y1 = ray_start
+        x2, y2 = ray_end
+        x3, y3 = seg_start
+        x4, y4 = seg_end
+        
+        denom = (x1-x2)*(y3-y4) - (y1-y2)*(x3-x4)
+        if denom == 0:
+            return None
+        t = ((x1-x3)*(y3-y4) - (y1-y3)*(x3-x4)) / denom
+        u = -((x1-x2)*(y1-y3) - (y1-y2)*(x1-x3)) / denom
+        if 0 <= t <= 1 and 0 <= u <= 1:
+            x = x1 + t*(x2-x1)
+            y = y1 + t*(y2-y1)
+            return (x, y)
+        return None
+        
+    def get_sensor_readings(self, walls, max_dist=400):
+        angles = list(range(0, 360, 45))  # углы относительно направления машины
+        readings = []
+        for rel_angle in angles:
+            global_angle = self.angle + rel_angle
+            dist = self.cast_ray(global_angle, walls, max_dist)
+            norm_dist = dist / max_dist
+            readings.append(norm_dist)
+        # Добавим скорость и ориентацию
+        speed_norm = self.speed_scalar / (self.speed * self.max_multiplyer)
+        angle_rad = math.radians(self.angle)
+        readings.extend([speed_norm, math.sin(angle_rad), math.cos(angle_rad)])
+        return np.array(readings, dtype=np.float32)

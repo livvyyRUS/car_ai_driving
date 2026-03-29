@@ -48,6 +48,7 @@ class GameWindow(Window):
         for obj in self.objects:
             if hasattr(obj, "update"):
                 obj.update(dt)
+        print(self.car.get_sensor_readings(self.walls))
         if self.car.wall_colisions(self.walls):
             self.car.func_when_dead()
         else:
