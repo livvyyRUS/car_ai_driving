@@ -37,6 +37,41 @@ class Map1(Map):
             Wall(batch, 940, 100, 290, 120),
             Wall(batch, 290, 120, 180, 170)
         ]
+        
+        self.reward_lines = [
+            Wall(batch, 95, 309, 190, 300, color=(0, 255, 0, 255)),
+            Wall(batch, 139, 434, 223, 415, color=(0, 255, 0, 255)),
+            Wall(batch, 130, 513, 211, 547, color=(0, 255, 0, 255)),
+            Wall(batch, 108, 625, 191, 590, color=(0, 255, 0, 255)),
+            Wall(batch, 247, 700, 262, 592, color=(0, 255, 0, 255)),
+            Wall(batch, 376, 705, 376, 592, color=(0, 255, 0, 255)),
+            Wall(batch, 518, 680, 479, 595, color=(0, 255, 0, 255)),
+            Wall(batch, 581, 672, 582, 597, color=(0, 255, 0, 255)),
+            Wall(batch, 687, 720, 708, 596, color=(0, 255, 0, 255)),
+            Wall(batch, 856, 702, 825, 599, color=(0, 255, 0, 255)),
+            Wall(batch, 900, 600, 1025, 600, color=(0, 255, 0, 255)),
+            Wall(batch, 844, 534, 972, 512, color=(0, 255, 0, 255)),
+            Wall(batch, 779, 461, 917, 417, color=(0, 255, 0, 255)),
+            Wall(batch, 757, 469, 715, 361, color=(0, 255, 0, 255)),
+            Wall(batch, 652, 508, 600, 390, color=(0, 255, 0, 255)),
+            Wall(batch, 450, 536, 455, 434, color=(0, 255, 0, 255)),
+            Wall(batch, 319, 449, 423, 407, color=(0, 255, 0, 255)),
+            Wall(batch, 270, 301, 402, 301, color=(0, 255, 0, 255)),
+            Wall(batch, 529, 274, 423, 168, color=(0, 255, 0, 255)),
+            Wall(batch, 661, 247, 616, 144, color=(0, 255, 0, 255)),
+            Wall(batch, 779, 224, 775, 123, color=(0, 255, 0, 255)),
+            Wall(batch, 880, 108, 909, 198, color=(0, 255, 0, 255)),
+            Wall(batch, 934, 100, 1093, 76, color=(0, 255, 0, 255)),
+            Wall(batch, 881, 101, 881, 20, color=(0, 255, 0, 255)),
+            Wall(batch, 750, 105, 750, 24, color=(0, 255, 0, 255)),
+            Wall(batch, 616, 109, 616, 28, color=(0, 255, 0, 255)),
+            Wall(batch, 484, 113, 484, 32, color=(0, 255, 0, 255)),
+            Wall(batch, 356, 117, 356, 36, color=(0, 255, 0, 255)),
+            Wall(batch, 230, 150, 169, 67, color=(0, 255, 0, 255)),
+            Wall(batch, 91, 178, 182, 178, color=(0, 255, 0, 255))
+        ]
+        
+        print(len(self.reward_lines))
     
     def load(self):
         return self.walls

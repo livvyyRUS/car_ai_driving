@@ -4,7 +4,7 @@ from pyglet.shapes import Line
 from .object import Object
 
 class Wall(Object):
-    def __init__(self, batch: Batch, x1: int, y1: int, x2: int, y2: int, thickness: int = 2, color: tuple[int, int, int, int] = (255, 255, 255, 255)) -> None:
+    def __init__(self, batch: Batch, x1: int, y1: int, x2: int, y2: int, thickness: int = 3, color: tuple[int, int, int, int] = (255, 255, 255, 255)) -> None:
         self.batch = batch
         self.x1 = x1
         self.y1 = y1

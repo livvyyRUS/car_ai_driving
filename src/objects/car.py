@@ -10,13 +10,16 @@ from pyglet.window import key
 from .object import Object
 from .wall import Wall
 
+from src.maps.map import Map
+
 
 class Car(Object):
     def __init__(
-        self, x_pos: float, y_pos: float, batch: Batch, window: Window
+        self, x_pos: float, y_pos: float, batch: Batch, window: Window, map: Map
     ) -> None:
         self.batch = batch
         self.window = window
+        self.map = map
 
         # Загружаем изображение
         self.image = pyglet.image.load("sprites\\little_car.png")
@@ -36,7 +39,7 @@ class Car(Object):
 
         # Остальные параметры...
         self.speed = 1000
-        self.max_multiplyer = 25
+        self.max_multiplyer = 1000
         self.velocity_x = 0
         self.velocity_y = 0
         self.angle = 0
@@ -97,6 +100,8 @@ class Car(Object):
 
         self.sprite.position = (self.x_pos, self.y_pos, 0)
         self.sprite.rotation = self.angle
+        
+        self.reward_state = len(self.map.reward_lines) - 1
 
     def get_rotated_corners(self):
         angle = math.radians(
@@ -154,11 +159,17 @@ class Car(Object):
                 return True
         return False
 
-    def wall_colisions(self, walls: list[Wall]):
-        for wall in walls:
+    def wall_colisions(self):
+        for wall in self.map.walls:
             if self.sprite_wall_collision((wall.x1, wall.y1), (wall.x2, wall.y2)):
                 return True
         return False
+    
+    def reward_colisions(self):
+        for index, wall in enumerate(self.map.reward_lines):
+            if self.sprite_wall_collision((wall.x1, wall.y1), (wall.x2, wall.y2)):
+                return index
+        return -1
 
     def func_when_dead(self):
         self.x_pos = self.last_x_pos
@@ -167,7 +178,7 @@ class Car(Object):
     def func_when_alive(self):
         self.sprite.color = (255, 255, 255)
         
-    def cast_ray(self, angle_deg, walls, max_distance=400):
+    def cast_ray(self, angle_deg, max_distance=400):
         """Пустить луч от центра машинки под углом angle_deg (глобальный угол).
         Вернуть расстояние до ближайшей стены или max_distance."""
         angle_rad = math.radians(angle_deg)
@@ -176,7 +187,7 @@ class Car(Object):
         # Начальная точка
         x0, y0 = self.x_pos, self.y_pos
         min_dist = max_distance
-        for wall in walls:
+        for wall in self.map.walls:
             # wall – объект с атрибутами x1,y1,x2,y2
             # Проверяем пересечение луча (x0,y0)-(x0+dx*max_dist, y0+dy*max_dist) со стеной
             intersect_point = self.ray_segment_intersection(
@@ -211,12 +222,12 @@ class Car(Object):
             return (x, y)
         return None
         
-    def get_sensor_readings(self, walls, max_dist=400):
+    def get_sensor_readings(self, max_dist=400):
         angles = list(range(0, 360, 45))  # углы относительно направления машины
         readings = []
         for rel_angle in angles:
             global_angle = self.angle + rel_angle
-            dist = self.cast_ray(global_angle, walls, max_dist)
+            dist = self.cast_ray(global_angle, self.map.walls, max_dist)
             norm_dist = dist / max_dist
             readings.append(norm_dist)
         # Добавим скорость и ориентацию
@@ -224,3 +235,30 @@ class Car(Object):
         angle_rad = math.radians(self.angle)
         readings.extend([speed_norm, math.sin(angle_rad), math.cos(angle_rad)])
         return np.array(readings, dtype=np.float32)
+
+
+    def remove(self):
+        if self.sprite:
+            self.sprite.delete()
+            self.sprite = None
+            
+            
+    def get_reward(self):
+        if self.wall_colisions():
+            return -10
+        
+        get_wall = self.get_reward()
+        if get_wall == -1:
+            return 0.1
+        
+        waited_wall = self.reward_state + 1 if self.reward_state + 1 < len(self.map.reward_lines) else 0
+        
+        if get_wall == waited_wall == 29:
+            return 20
+        
+        if get_wall == waited_wall:
+            return 10
+        
+        
+        
+        
